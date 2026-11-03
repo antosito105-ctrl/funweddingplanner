@@ -610,7 +610,7 @@
                     </div>
                     <div class="bg-rose-50/80 p-4 rounded-2xl border border-rose-100">
                         <div class="text-[10px] font-bold uppercase text-rose-700 tracking-wider">UANG KELUAR</div>
-                        <div class="text-base font-bold text-rose-600 mt-1" id="fin-uang-keluar">Rp 0</div>
+                        <div class="text-base font-bold text-rose-600 mt-1" id="fin-uang-keluar">Rp 6</div>
                     </div>
                     <div class="bg-blue-50/80 p-4 rounded-2xl border border-blue-100">
                         <div class="text-[10px] font-bold uppercase text-blue-700 tracking-wider">SALDO</div>
@@ -819,7 +819,6 @@
             }
         }
 
-        // FUNGSI LOGIN & TARIK DATA DETAIL DARI GOOGLE SHEETS SECARA SINKRON
         async function loginWithCode() {
             const code = document.getElementById('inputAccessCode').value.trim().toUpperCase();
             if (!code) { alert('Silakan masukkan Kode Akses Anda terlebih dahulu!'); return; }
@@ -839,8 +838,8 @@
                     appState.accessKey = code;
                     appState.coupleName = (result.data.names || "AMAR DAN ENJELI").toUpperCase();
                     appState.totalBudget = parseFloat(result.data.budget) || 150000000;
-                    appState.akadDate = result.data.akad || '2026-12-29';
-                    appState.resepsiDate = result.data.resepsi || '2026-12-30';
+                    appState.akadDate = (result.data.akad || '2026-12-29').split('T')[0];
+                    appState.resepsiDate = (result.data.resepsi || '2026-12-30').split('T')[0];
 
                     if (result.data.appData) {
                         try {
@@ -898,8 +897,8 @@
                     appState.accessKey = result.code;
                     appState.coupleName = names.toUpperCase();
                     appState.totalBudget = parseFloat(budget) || 150000000;
-                    appState.akadDate = akad;
-                    appState.resepsiDate = resepsi;
+                    appState.akadDate = akad.split('T')[0];
+                    appState.resepsiDate = resepsi.split('T')[0];
 
                     renderAll();
                     document.getElementById('gateScreen').classList.add('hidden');
@@ -943,9 +942,11 @@
             renderFinances();
         }
 
+        // PERBAIKAN TIMER HITUNG MUNDUR (SUPPORT FORMAT STRING ISO / YYYY-MM-DD)
         function startCountdown() {
             function updateTimer() {
-                const target = new Date(appState.resepsiDate + "T09:00:00").getTime();
+                const cleanDate = (appState.resepsiDate || "2026-12-30").split('T')[0];
+                const target = new Date(cleanDate + "T09:00:00").getTime();
                 const now = new Date().getTime();
                 const diff = target - now;
 
@@ -959,6 +960,11 @@
                     document.getElementById('cd-hours').innerText = hours < 10 ? '0' + hours : hours;
                     document.getElementById('cd-mins').innerText = mins < 10 ? '0' + mins : mins;
                     document.getElementById('cd-secs').innerText = secs < 10 ? '0' + secs : secs;
+                } else {
+                    document.getElementById('cd-days').innerText = '00';
+                    document.getElementById('cd-hours').innerText = '00';
+                    document.getElementById('cd-mins').innerText = '00';
+                    document.getElementById('cd-secs').innerText = '00';
                 }
             }
             updateTimer();
@@ -1199,6 +1205,7 @@
             lucide.createIcons();
         }
 
+        // FUNGSI KALKULASI KEUANGAN YANG DI SINKRONKAN KE DASHBOARD & TAB FINANSIAL
         function renderFinances() {
             const tbody = document.getElementById('tx-table-body');
             tbody.innerHTML = appState.transactions.map(t => `
@@ -1228,11 +1235,13 @@
             const saldo = totalMasuk - totalKeluar;
             const budgetPercent = appState.totalBudget > 0 ? Math.round((totalBill / appState.totalBudget) * 100) : 0;
 
+            // Update Tab Finansial
             document.getElementById('fin-uang-masuk').innerText = formatIDR(totalMasuk);
             document.getElementById('fin-uang-keluar').innerText = formatIDR(totalKeluar);
             document.getElementById('fin-saldo').innerText = formatIDR(saldo);
             document.getElementById('fin-sisa-tagihan-box').innerText = formatIDR(sisaTagihan);
 
+            // Update Dashboard Utama (Kalkulasi Otomatis Sesuai Tab 10)
             document.getElementById('dash-total-tagihan').innerText = formatIDR(totalBill);
             document.getElementById('dash-sudah-dibayar').innerText = formatIDR(totalPaid);
             document.getElementById('dash-sisa-tagihan').innerText = formatIDR(sisaTagihan);
@@ -1447,7 +1456,6 @@
             saveDataNotification();
         }
 
-        // FUNGSI SIMPAN DATA KE CLOUD (MENYIMPAN SEMUA DETAIL KE GOOGLE SHEETS)
         async function saveDataNotification() {
             const btn = document.querySelector('button[onclick="saveDataNotification()"]');
             if(btn) btn.innerText = "MENYIMPAN KE CLOUD...";
