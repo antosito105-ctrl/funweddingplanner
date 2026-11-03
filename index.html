@@ -278,19 +278,19 @@
                     </div>
                     <div class="grid grid-cols-4 gap-2 sm:gap-3 text-slate-900">
                         <div class="bg-white/95 p-2.5 rounded-xl shadow-sm">
-                            <div class="text-xl sm:text-2xl font-bold text-cyanTheme-500" id="cd-days">56</div>
+                            <div class="text-xl sm:text-2xl font-bold text-cyanTheme-500" id="cd-days">00</div>
                             <div class="text-[9px] font-bold text-slate-400 uppercase">Hari</div>
                         </div>
                         <div class="bg-white/95 p-2.5 rounded-xl shadow-sm">
-                            <div class="text-xl sm:text-2xl font-bold text-cyanTheme-500" id="cd-hours">03</div>
+                            <div class="text-xl sm:text-2xl font-bold text-cyanTheme-500" id="cd-hours">00</div>
                             <div class="text-[9px] font-bold text-slate-400 uppercase">Jam</div>
                         </div>
                         <div class="bg-white/95 p-2.5 rounded-xl shadow-sm">
-                            <div class="text-xl sm:text-2xl font-bold text-cyanTheme-500" id="cd-mins">28</div>
+                            <div class="text-xl sm:text-2xl font-bold text-cyanTheme-500" id="cd-mins">00</div>
                             <div class="text-[9px] font-bold text-slate-400 uppercase">Menit</div>
                         </div>
                         <div class="bg-white/95 p-2.5 rounded-xl shadow-sm">
-                            <div class="text-xl sm:text-2xl font-bold text-cyanTheme-500" id="cd-secs">24</div>
+                            <div class="text-xl sm:text-2xl font-bold text-cyanTheme-500" id="cd-secs">00</div>
                             <div class="text-[9px] font-bold text-slate-400 uppercase">Detik</div>
                         </div>
                     </div>
@@ -610,7 +610,7 @@
                     </div>
                     <div class="bg-rose-50/80 p-4 rounded-2xl border border-rose-100">
                         <div class="text-[10px] font-bold uppercase text-rose-700 tracking-wider">UANG KELUAR</div>
-                        <div class="text-base font-bold text-rose-600 mt-1" id="fin-uang-keluar">Rp 6</div>
+                        <div class="text-base font-bold text-rose-600 mt-1" id="fin-uang-keluar">Rp 0</div>
                     </div>
                     <div class="bg-blue-50/80 p-4 rounded-2xl border border-blue-100">
                         <div class="text-[10px] font-bold uppercase text-blue-700 tracking-wider">SALDO</div>
@@ -758,7 +758,7 @@
 
     <!-- APPLICATION LOGIC & DATA STATE -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVpaJBrzdSYKHtvsScamF17AwHhZr5elN-WLlSLcApg7vivmirqrTevB1hR0u9qZE70w/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwwgTZHW0cWn5lk3WozR_reOESUWVp6SY27G9KVQOJ7p9gRPDGUSVfNZ5TsbiHeiwsgtw/exec";
 
         let appState = {
             coupleName: "AMAR DAN ENJELI",
@@ -819,12 +819,13 @@
             }
         }
 
+        // FUNGSI LOGIN & AUTOMATIC FETCH DATA DARI CLOUD
         async function loginWithCode() {
             const code = document.getElementById('inputAccessCode').value.trim().toUpperCase();
             if (!code) { alert('Silakan masukkan Kode Akses Anda terlebih dahulu!'); return; }
 
             const btn = document.getElementById('btnLoginBtn');
-            btn.innerText = 'MEMERIKSA & MENARIK DATA...';
+            btn.innerText = 'MENARIK DATA DARI CLOUD...';
             btn.disabled = true;
 
             try {
@@ -942,7 +943,6 @@
             renderFinances();
         }
 
-        // PERBAIKAN TIMER HITUNG MUNDUR (SUPPORT FORMAT STRING ISO / YYYY-MM-DD)
         function startCountdown() {
             function updateTimer() {
                 const cleanDate = (appState.resepsiDate || "2026-12-30").split('T')[0];
@@ -1205,7 +1205,6 @@
             lucide.createIcons();
         }
 
-        // FUNGSI KALKULASI KEUANGAN YANG DI SINKRONKAN KE DASHBOARD & TAB FINANSIAL
         function renderFinances() {
             const tbody = document.getElementById('tx-table-body');
             tbody.innerHTML = appState.transactions.map(t => `
@@ -1235,13 +1234,11 @@
             const saldo = totalMasuk - totalKeluar;
             const budgetPercent = appState.totalBudget > 0 ? Math.round((totalBill / appState.totalBudget) * 100) : 0;
 
-            // Update Tab Finansial
             document.getElementById('fin-uang-masuk').innerText = formatIDR(totalMasuk);
             document.getElementById('fin-uang-keluar').innerText = formatIDR(totalKeluar);
             document.getElementById('fin-saldo').innerText = formatIDR(saldo);
             document.getElementById('fin-sisa-tagihan-box').innerText = formatIDR(sisaTagihan);
 
-            // Update Dashboard Utama (Kalkulasi Otomatis Sesuai Tab 10)
             document.getElementById('dash-total-tagihan').innerText = formatIDR(totalBill);
             document.getElementById('dash-sudah-dibayar').innerText = formatIDR(totalPaid);
             document.getElementById('dash-sisa-tagihan').innerText = formatIDR(sisaTagihan);
